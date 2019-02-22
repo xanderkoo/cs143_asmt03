@@ -91,6 +91,45 @@ public class SeamCarving {
 		return energyArray;
 	}
 
+	private static int[][] findSeam(int[][] energyArray, int k) {
+		int[][] directional = new int[energyArray.length][energyArray[0].length];
+		int[][] energyPath = energyArray;
+
+		for (int i = 1; i < energyPath[0].length; i++) {
+			for (int j = 0; j < energyPath.length; j++) {
+				if (j == 0) {
+					energyPath[i][j] = energyPath[i][j] + Math.min(energyPath[i - 1][j + 1], energyPath[i - 1][j]);
+					if (energyPath[i - 1][j + 1] < energyPath[i - 1][j]) {
+						directional[i][j] = 1;
+					} else {
+						directional[i][j] = 0;
+					}
+				} else if (j == energyPath.length - 1) {
+					energyPath[i][j] = energyPath[i][j] + Math.min(energyPath[i - 1][j - 1], energyPath[i - 1][j]);
+					if (energyPath[i - 1][j - 1] < energyPath[i - 1][j]) {
+						directional[i][j] = -1;
+					} else {
+						directional[i][j] = 0;
+					}
+				} else {
+					energyPath[i][j] = energyPath[i][j] + Math.min(energyPath[i - 1][j - 1],
+							(Math.min(energyPath[i - 1][j], energyPath[i - 1][j + 1])));
+					if (energyPath[i - 1][j] <= energyPath[i - 1][j - 1] && energyPath[i - 1][j] <= energyPath[i - 1][j + 1]) {
+						directional[i][j] = 0;
+					} else if(energyPath)
+				}
+
+			}
+		}
+
+		return energyPath;
+
+	}
+
+	private static int getPixelVertical(int[][] energyArray, int i, int j) {
+
+	}
+
 	public static void main(String args[]) throws IOException {
 		File file = new File("./image_original.jpg");
 		BufferedImage imageSource = ImageIO.read(file);
