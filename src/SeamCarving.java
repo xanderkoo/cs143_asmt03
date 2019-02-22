@@ -9,113 +9,90 @@ import java.awt.Color;
 
 public class SeamCarving {
 
-	private int energyArray[][];
-
+	/**
+	 * Takes in an array of RGB values (Color) corresponding to the inputed image,
+	 * and returns an array of energy values for each pixel
+	 * 
+	 * @param colorArray array of RGB values (Color), corresponding to the image
+	 * @return array of energy values for each pixel
+	 */
 	private static double[][] energyFunction(Color[][] colorArray) {
 
+		// Array of energy values for each pixel
 		double[][] energyArray = new double[colorArray.length][colorArray[0].length];
-		double redEnergy, greenEnergy, blueEnergy;
-		double ddx, ddy;
 
-		// Go through entire array
+		// Values to store energy values of each pixel for each color channel
+		double redEnergy, greenEnergy, blueEnergy;
+
+		// Variables to store the magnitude of the derivatives of each pixel for each
+		// color channel
+		double ddxRed, ddyRed, ddxGreen, ddyGreen, ddxBlue, ddyBlue;
+
+		/*
+		 * Go through entire array, getting partial derivatives for red, green, and blue
+		 * color channels for each pixel and entering the average sum of partial
+		 * derivatives for each pixel into the energy array
+		 */
 		for (int i = 0; i < colorArray.length; i++) {
 			for (int j = 0; j < colorArray[i].length; j++) {
 
-				// On left edge
+				// abs(d/dx) on left edge
 				if (i == 0) {
-					ddx = Math.abs(colorArray[i + 1][j].getRed() - colorArray[i][j].getRed());
+					ddxRed = Math.abs(colorArray[i + 1][j].getRed() - colorArray[i][j].getRed());
+					ddxGreen = Math.abs(colorArray[i + 1][j].getGreen() - colorArray[i][j].getGreen());
+					ddxBlue = Math.abs(colorArray[i + 1][j].getBlue() - colorArray[i][j].getBlue());
 				}
 
-				// On right edge
+				// abs(d/dx) on right edge
 				else if (i == colorArray.length - 1) {
-					ddx = Math.abs(colorArray[i - 1][j].getRed() - colorArray[i][j].getRed());
-
+					ddxRed = Math.abs(colorArray[i - 1][j].getRed() - colorArray[i][j].getRed());
+					ddxGreen = Math.abs(colorArray[i - 1][j].getGreen() - colorArray[i][j].getGreen());
+					ddxBlue = Math.abs(colorArray[i - 1][j].getBlue() - colorArray[i][j].getBlue());
 				}
 
-				// Not on a vertical edge
+				// abs(d/dx) not on a vertical edge
 				else {
-					ddx = Math.abs(colorArray[i - 1][j].getRed() - colorArray[i + 1][j].getRed()) / 2;
+					ddxRed = Math.abs(colorArray[i - 1][j].getRed() - colorArray[i + 1][j].getRed()) / 2;
+					ddxGreen = Math.abs(colorArray[i - 1][j].getGreen() - colorArray[i + 1][j].getGreen()) / 2;
+					ddxBlue = Math.abs(colorArray[i - 1][j].getBlue() - colorArray[i + 1][j].getBlue()) / 2;
 				}
 
-				// On top edge
+				// abs(d/dy) on top edge
 				if (j == 0) {
-					ddy = Math.abs(colorArray[i][j + 1].getRed() - colorArray[i][j].getRed());
-
+					ddyRed = Math.abs(colorArray[i][j + 1].getRed() - colorArray[i][j].getRed());
+					ddyGreen = Math.abs(colorArray[i][j + 1].getGreen() - colorArray[i][j].getGreen());
+					ddyBlue = Math.abs(colorArray[i][j + 1].getBlue() - colorArray[i][j].getBlue());
 				}
 
-				// On bottom edge
+				// abs(d/dy) on bottom edge
 				else if (j == colorArray[i].length - 1) {
-					ddy = Math.abs(colorArray[i][j - 1].getRed() - colorArray[i][j].getRed());
-
+					ddyRed = Math.abs(colorArray[i][j - 1].getRed() - colorArray[i][j].getRed());
+					ddyGreen = Math.abs(colorArray[i][j - 1].getGreen() - colorArray[i][j].getGreen());
+					ddyBlue = Math.abs(colorArray[i][j - 1].getBlue() - colorArray[i][j].getBlue());
 				}
 
-				// Not on a horizontal edge
+				// abs(d/dy) not on a horizontal edge
 				else {
-					ddy = Math.abs(colorArray[i][j - 1].getRed() - colorArray[i][j + 1].getRed()) / 2;
-
+					ddyRed = Math.abs(colorArray[i][j - 1].getRed() - colorArray[i][j + 1].getRed()) / 2;
+					ddyGreen = Math.abs(colorArray[i][j - 1].getGreen() - colorArray[i][j + 1].getGreen()) / 2;
+					ddyBlue = Math.abs(colorArray[i][j - 1].getBlue() - colorArray[i][j + 1].getBlue()) / 2;
 				}
 
-				redEnergy = ddx + ddy;
+				// sum of the magnitudes of the derivatives for each pixel
+				redEnergy = ddxRed + ddyRed;
+				greenEnergy = ddxGreen + ddyGreen;
+				blueEnergy = ddxBlue + ddyBlue;
 
-				// Edge cases in the x axis
-				if (i == 0) {
-					ddx = Math.abs(colorArray[i + 1][j].getGreen() - colorArray[i][j].getGreen());
-				} else if (i == colorArray.length - 1) {
-					ddx = Math.abs(colorArray[i - 1][j].getGreen() - colorArray[i][j].getGreen());
-
-				} else { // Not on a vertical edge
-					ddx = Math.abs(colorArray[i - 1][j].getGreen() - colorArray[i + 1][j].getGreen()) / 2;
-				}
-
-				// Edge cases in the y axis
-				if (j == 0) {
-					ddy = Math.abs(colorArray[i][j + 1].getGreen() - colorArray[i][j].getGreen());
-				} else if (j == colorArray[i].length - 1) {
-					ddy = Math.abs(colorArray[i][j - 1].getGreen() - colorArray[i][j].getGreen());
-				} else { // Not on a horizontal edge
-					ddy = Math.abs(colorArray[i][j - 1].getGreen() - colorArray[i][j + 1].getGreen()) / 2;
-
-				}
-
-				greenEnergy = ddx + ddy;
-
-				// Edge cases in the x axis
-				if (i == 0) {
-					ddx = Math.abs(colorArray[i + 1][j].getBlue() - colorArray[i][j].getBlue());
-				}
-
-				else if (i == colorArray.length - 1) {
-					ddx = Math.abs(colorArray[i - 1][j].getBlue() - colorArray[i][j].getBlue());
-
-				} else {
-					ddx = Math.abs(colorArray[i - 1][j].getBlue() - colorArray[i + 1][j].getBlue()) / 2;
-				}
-
-				// Edge cases in the y axis
-				if (j == 0) {
-					ddy = Math.abs(colorArray[i][j + 1].getBlue() - colorArray[i][j].getBlue());
-
-				} else if (j == colorArray[i].length - 1) {
-					ddy = Math.abs(colorArray[i][j - 1].getBlue() - colorArray[i][j].getBlue());
-
-				} else {
-					ddy = Math.abs(colorArray[i][j - 1].getBlue() - colorArray[i][j + 1].getBlue()) / 2;
-
-				}
-
-				blueEnergy = ddx + ddy;
-
-				// Average energy function output for each color channel
+				// Average energy function output for each color channel for each pixel
 				energyArray[i][j] = (redEnergy + greenEnergy + blueEnergy) / 3;
 			}
-
 		}
 
 		return energyArray;
 	}
 
 	public static void main(String args[]) throws IOException {
-		File file = new File("./kinkakuji.jpg");
+		File file = new File("./image_original.jpg");
 		BufferedImage imageSource = ImageIO.read(file);
 		int rows = imageSource.getHeight();
 		int cols = imageSource.getWidth();
@@ -136,13 +113,13 @@ public class SeamCarving {
 
 		/* Save as new image where g values set to 0 */
 		BufferedImage imageNew = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
-		File fileNew = new File("./leaves_out_java.jpg");
+		File fileNew = new File("./image_energy.jpg");
 		double[][] energyArray = energyFunction(image);
 		for (int i = 0; i < cols; i++) {
 			for (int j = 0; j < rows; j++) {
 				System.out.print((int) energyArray[i][j] + " ");
-				int r = 0; //(int) energyArray[i][j];
-				int g = 0; //(int) energyArray[i][j];
+				int r = 255 - (int) energyArray[i][j];
+				int g = 255 - (int) energyArray[i][j];
 				int b = 255 - (int) energyArray[i][j];
 				int col = (r << 16) | (g << 8) | b;
 				imageNew.setRGB(i, j, col);
