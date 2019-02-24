@@ -357,7 +357,7 @@ public class SeamCarving {
 
 		/* Save an image of the energy in grayscale */
 		BufferedImage imageEnergy = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
-		File fileEnergy = new File("./image_energy.jpg");
+		File fileEnergy = new File("./image_energy.png");
 		for (int i = 0; i < cols; i++) {
 			for (int j = 0; j < rows; j++) {
 				int r = 255 - (int) energyArray[i][j];
@@ -367,11 +367,11 @@ public class SeamCarving {
 				imageEnergy.setRGB(i, j, col);
 			}
 		}
-		ImageIO.write(imageEnergy, "JPEG", fileEnergy);
+		ImageIO.write(imageEnergy, "PNG", fileEnergy);
 		
 		/* Save an image of the image with a seam */
 		BufferedImage imageSeam = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
-		File fileSeam = new File("./image_seam.jpg");
+		File fileSeam = new File("./image_seam.png");
 		// Copies the energy representation of the photo into the buffered image
 		for (int i = 0; i < cols; i++) {
 			for (int j = 0; j < rows; j++) {
@@ -380,7 +380,8 @@ public class SeamCarving {
 		}
 		// Draws the seam
 		retraceHorizontal(findHorizontalSeam(energyArray), imageSeam);
-		ImageIO.write(imageSeam, "JPEG", fileSeam); 
+		
+		ImageIO.write(imageSeam, "PNG", fileSeam); 
 		
 		
 		
