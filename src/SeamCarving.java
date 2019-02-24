@@ -91,43 +91,135 @@ public class SeamCarving {
 		return energyArray;
 	}
 
-	private static int[][] findSeam(int[][] energyArray, int k) {
-		int[][] directional = new int[energyArray.length][energyArray[0].length];
-		int[][] energyPath = energyArray;
+//	private static int[][] findSeam(int[][] energyArray, int k) {
+//		int[][] directional = new int[energyArray.length][energyArray[0].length];
+//		int[][] energyPath = energyArray;
+//
+//		for (int i = 1; i < energyPath[0].length; i++) {
+//			for (int j = 0; j < energyPath.length; j++) {
+//				if (j == 0) {
+//					energyPath[i][j] = energyPath[i][j] + Math.min(energyPath[i - 1][j + 1], energyPath[i - 1][j]);
+//					if (energyPath[i - 1][j + 1] < energyPath[i - 1][j]) {
+//						directional[i][j] = 1;
+//					} else {
+//						directional[i][j] = 0;
+//					}
+//				} else if (j == energyPath.length - 1) {
+//					energyPath[i][j] = energyPath[i][j] + Math.min(energyPath[i - 1][j - 1], energyPath[i - 1][j]);
+//					if (energyPath[i - 1][j - 1] < energyPath[i - 1][j]) {
+//						directional[i][j] = -1;
+//					} else {
+//						directional[i][j] = 0;
+//					}
+//				} else {
+//					energyPath[i][j] = energyPath[i][j] + Math.min(energyPath[i - 1][j - 1],
+//							(Math.min(energyPath[i - 1][j], energyPath[i - 1][j + 1])));
+//					if (energyPath[i - 1][j] <= energyPath[i - 1][j - 1] && energyPath[i - 1][j] <= energyPath[i - 1][j + 1]) {
+//						directional[i][j] = 0;
+//					} else if(energyPath)
+//				}
+//
+//			}
+//		}
+//
+//		return energyPath;
+//
+//	}
 
-		for (int i = 1; i < energyPath[0].length; i++) {
-			for (int j = 0; j < energyPath.length; j++) {
-				if (j == 0) {
-					energyPath[i][j] = energyPath[i][j] + Math.min(energyPath[i - 1][j + 1], energyPath[i - 1][j]);
-					if (energyPath[i - 1][j + 1] < energyPath[i - 1][j]) {
-						directional[i][j] = 1;
-					} else {
-						directional[i][j] = 0;
-					}
-				} else if (j == energyPath.length - 1) {
-					energyPath[i][j] = energyPath[i][j] + Math.min(energyPath[i - 1][j - 1], energyPath[i - 1][j]);
-					if (energyPath[i - 1][j - 1] < energyPath[i - 1][j]) {
-						directional[i][j] = -1;
-					} else {
-						directional[i][j] = 0;
-					}
-				} else {
-					energyPath[i][j] = energyPath[i][j] + Math.min(energyPath[i - 1][j - 1],
-							(Math.min(energyPath[i - 1][j], energyPath[i - 1][j + 1])));
-					if (energyPath[i - 1][j] <= energyPath[i - 1][j - 1] && energyPath[i - 1][j] <= energyPath[i - 1][j + 1]) {
-						directional[i][j] = 0;
-					} else if(energyPath)
+	private static int[][] findHorizontalSeam(int[][] energyArray) {
+		// width and height of array with energy values
+		int width = energyArray.length;
+		int height = energyArray[0].length;
+
+		// variable to keep track of minimum energy value of path
+		int minimum;
+
+		// 2D array to store path energy values and direction (-1, 0, 1)
+		int[][] energyPath = energyArray.clone();
+		int[][] directional = new int[width][height];
+
+		// Loops through energy array to find smallest value of the adjacent pixels
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+
+				// If leftmost column...
+				if (i == 0) {
+					// Since these pixels are the beginning of the path, set path energy to the
+					// energy of that pixel
+					energyPath[i][j] = energyArray[i][j];
+
+					// Direction defaults to 0
+					directional[i][j] = 0; // TODO most-left: 0 ?
 				}
 
+				// Else...
+				else {
+					// If in the top row...
+					if (j == 0) {
+
+						// Next pixel with the minimum energy is either to the left or down-left
+						minimum = Math.min(energyPath[i + 1][j], energyPath[i + 1][j + 1]);
+
+						// Add direction based on if next pixel is left...
+						if (minimum == energyPath[i + 1][j]) {
+							directional[i][j] = 0;
+						}
+
+						// or down-left (y + 1)
+						else {
+							directional[i][j] = 1;
+						}
+
+					}
+
+					// If in the bottom row...
+					else if (j == (height - 1)) {
+
+						// Next pixel with the minimum energy is either to the left or up-left
+						minimum = Math.min(energyPath[i + 1][j], energyPath[i + 1][j - 1]);
+
+						// Add direction based on if next pixel is left...
+						if (minimum == energyPath[i + 1][j]) {
+							directional[i][j] = 0;
+						}
+
+						// ...or up-left (y - 1)
+						else {
+							directional[i][j] = -1;
+						}
+					}
+
+					// If not the bottom or top row...
+					else {
+
+						// Next pixel with the minimum energy is to the up-left, left, or down-left
+						minimum = Math.min(energyPath[i + 1][j - 1],
+								Math.min(energyPath[i + 1][j], energyPath[i + 1][j + 1]));
+
+						// Add direction based on if next pixel is up-left (y - 1)
+						if (minimum == energyPath[i + 1][j - 1]) {
+							directional[i][j] = -1;
+						}
+
+						// straight left (y)
+						else if (minimum == energyPath[i + 1][j]) {
+							directional[i][j] = 0;
+						}
+
+						// or down-left (y + 1)
+						else {
+							directional[i][j] = 1;
+						}
+					}
+					
+					// add the minimum value to the energy value of the cell
+					// and assign the cumulative value to new 2D array
+					energyPath[i][j] = energyArray[i][j] + minimum;
+
+				}
 			}
 		}
-
 		return energyPath;
-
-	}
-
-	private static int getPixelVertical(int[][] energyArray, int i, int j) {
-
 	}
 
 	public static void main(String args[]) throws IOException {
