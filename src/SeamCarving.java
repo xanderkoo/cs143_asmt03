@@ -183,7 +183,7 @@ public class SeamCarving {
 
 					// add the minimum value to the energy value of the cell
 					// and assign the cumulative value to new 2D array
-					pathEnergyDirArray[i][j].setFirst(energyArray[i][j] + minimum);
+					pathEnergyDirArray[i][j].setCumulPathEnergy(energyArray[i][j] + minimum);
 				}
 			}
 		}
@@ -282,14 +282,57 @@ public class SeamCarving {
 
 					// add the minimum value to the energy value of the cell
 					// and assign the cumulative value to new 2D array
-					pathEnergyDirArray[i][j].setFirst(energyArray[i][j] + minimum);
+					pathEnergyDirArray[i][j].setCumulPathEnergy(energyArray[i][j] + minimum);
 				}
 			}
 		}
 		return pathEnergyDirArray;
 	}
 
+	public static void retraceHorizontal(SeamFindingPair[][] pathArray, BufferedImage image) {
+
+		/*
+		 * Find the index in the path array of the minimum energy path to the rightmost
+		 * column
+		 */
+		int minIndex = 0;
+		double min = pathArray[pathArray.length - 1][minIndex].getCumulPathEnergy();
+		for (int j = 0; j < pathArray[pathArray.length - 1].length; j++) {
+			if (pathArray[pathArray.length - 1][j].getCumulPathEnergy() >= min) {
+				minIndex = j;
+				min = pathArray[pathArray.length - 1][j].getCumulPathEnergy();
+			}
+		}
+
+		System.out.print("Minimum energy path, horizontal: " + min);
+
+		/*
+		 * Trace back that minimum energy path and re-color the corresponding pixels in
+		 * the image
+		 */
+
+		// Keep track of direction (-1, 0, 1 for up-left, straight-left, down-left) of
+		// next pixel and next index
+		int nextDir = pathArray[pathArray.length - 1][minIndex].getDirection();
+		int nextIndex = minIndex;
+
+		// Trace the path back and color the seam red
+		for (int i = pathArray.length; i > 0; i--) {
+			// Set pixel red
+			image.setRGB(i - 1, nextIndex, Color.RED.getRGB());
+
+			// Update index of next pixel based on the direction
+			nextIndex += nextDir;
+			
+			// Update direction to go to next
+			nextDir = pathArray[i - 1][nextIndex].getDirection();
+		}
+
+		// TODO: i am going to die
+	}
+
 	public static void main(String args[]) throws IOException {
+
 		File file = new File("./image_original.jpg");
 		BufferedImage imageSource = ImageIO.read(file);
 		int rows = imageSource.getHeight();
@@ -308,23 +351,39 @@ public class SeamCarving {
 				image[i][j] = new Color(red, green, blue);
 			}
 		}
-
-		/* Save as new image where g values set to 0 */
-		BufferedImage imageNew = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
-		File fileNew = new File("./image_energy.jpg");
+		
+		
 		double[][] energyArray = energyFunction(image);
+
+		/* Save an image of the energy in grayscale */
+		BufferedImage imageEnergy = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
+		File fileEnergy = new File("./image_energy.jpg");
 		for (int i = 0; i < cols; i++) {
 			for (int j = 0; j < rows; j++) {
-				System.out.print((int) energyArray[i][j] + " ");
 				int r = 255 - (int) energyArray[i][j];
 				int g = 255 - (int) energyArray[i][j];
 				int b = 255 - (int) energyArray[i][j];
 				int col = (r << 16) | (g << 8) | b;
-				imageNew.setRGB(i, j, col);
+				imageEnergy.setRGB(i, j, col);
 			}
-			System.out.println();
 		}
-
-		ImageIO.write(imageNew, "JPEG", fileNew);
+		ImageIO.write(imageEnergy, "JPEG", fileEnergy);
+		
+		/* Save an image of the image with a seam */
+		BufferedImage imageSeam = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
+		File fileSeam = new File("./image_seam.jpg");
+		// Copies the energy representation of the photo into the buffered image
+		for (int i = 0; i < cols; i++) {
+			for (int j = 0; j < rows; j++) {
+				imageSeam.setRGB(i, j, imageEnergy.getRGB(i, j));
+			}
+		}
+		// Draws the seam
+		retraceHorizontal(findHorizontalSeam(energyArray), imageSeam);
+		ImageIO.write(imageSeam, "JPEG", fileSeam); 
+		
+		
+		
+		
 	}
 }

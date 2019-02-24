@@ -4,51 +4,51 @@
  */
 public class SeamFindingPair {
 
-	private double d;
-	private int i;
+	private double energy;
+	private int direction;
 
 	/**
-	 * create pair of double and int
+	 * create pair of minimum cumulative path energy and direction (-1, 0, 1)
 	 * 
-	 * @param i1
-	 * @param i2
+	 * @param energy minimum cumulative path energy
+	 * @param direction (-1, 0, 1)
 	 */
-	public SeamFindingPair(double d, int i) {
-		this.d = d;
-		this.i = i;
-	}
-
-	/**
-	 * 
-	 * @return first number, double
-	 */
-	public double getFirst() {
-		return this.d;
+	public SeamFindingPair(double energy, int direction) {
+		this.energy = energy;
+		this.direction = direction;
 	}
 
 	/**
 	 * 
-	 * @return second number, int
+	 * @return cumulative path energy, double
 	 */
-	public int getSecond() {
-		return this.i;
+	public double getCumulPathEnergy() {
+		return this.energy;
 	}
 
 	/**
-	 * sets first number, double
+	 * 
+	 * @return direction (-1, 0, 1), int
 	 */
-	public void setFirst(double d) {
-		this.d = d;
+	public int getDirection() {
+		return this.direction;
 	}
 
 	/**
-	 * sets second number, int
+	 * sets cumulative path energy, double
 	 */
-	public void setSecond(int i) {
-		this.i = i;
+	public void setCumulPathEnergy(double energy) {
+		this.energy = energy;
+	}
+
+	/**
+	 * sets direction (-1, 0, 1), int
+	 */
+	public void setDirection(int direction) {
+		this.direction = direction;
 	}
 	
 	public String toString() {
-		return "<" + d + "," + i +">";
+		return "<" + energy + "," + direction +">";
 	}
 }
