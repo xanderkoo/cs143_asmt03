@@ -298,7 +298,7 @@ public class SeamCarving {
 		int minIndex = 0;
 		double min = pathArray[pathArray.length - 1][minIndex].getCumulPathEnergy();
 		for (int j = 0; j < pathArray[pathArray.length - 1].length; j++) {
-			if (pathArray[pathArray.length - 1][j].getCumulPathEnergy() >= min) {
+			if (pathArray[pathArray.length - 1][j].getCumulPathEnergy() < min) {
 				minIndex = j;
 				min = pathArray[pathArray.length - 1][j].getCumulPathEnergy();
 			}
@@ -323,7 +323,7 @@ public class SeamCarving {
 
 			// Update index of next pixel based on the direction
 			nextIndex += nextDir;
-			
+
 			// Update direction to go to next
 			nextDir = pathArray[i - 1][nextIndex].getDirection();
 		}
@@ -351,8 +351,7 @@ public class SeamCarving {
 				image[i][j] = new Color(red, green, blue);
 			}
 		}
-		
-		
+
 		double[][] energyArray = energyFunction(image);
 
 		/* Save an image of the energy in grayscale */
@@ -368,7 +367,7 @@ public class SeamCarving {
 			}
 		}
 		ImageIO.write(imageEnergy, "PNG", fileEnergy);
-		
+
 		/* Save an image of the image with a seam */
 		BufferedImage imageSeam = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
 		File fileSeam = new File("./image_seam.png");
@@ -380,11 +379,8 @@ public class SeamCarving {
 		}
 		// Draws the seam
 		retraceHorizontal(findHorizontalSeam(energyArray), imageSeam);
-		
-		ImageIO.write(imageSeam, "PNG", fileSeam); 
-		
-		
-		
-		
+
+		ImageIO.write(imageSeam, "PNG", fileSeam);
+
 	}
 }
