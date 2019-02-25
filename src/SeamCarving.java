@@ -168,13 +168,13 @@ public class SeamCarving {
 						minimum = Math.min(energyArray[i - 1][j - 1],
 								Math.min(energyArray[i][j - 1], energyArray[i + 1][j - 1]));
 
-						// Add direction based on if last pixel is up-left (y - 1)
-						if (minimum == energyArray[i - 1][j - 1])
-							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
-
-						// straight up (y)
-						else if (minimum == energyArray[i][j - 1])
+						// Add direction based on if last pixel is straight up (y)
+						if (minimum == energyArray[i][j - 1])
 							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 0);
+
+						// up-left (y - 1)
+						else if (minimum == energyArray[i - 1][j - 1])
+							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
 
 						// or up-right (y + 1)
 						else
@@ -267,13 +267,12 @@ public class SeamCarving {
 						minimum = Math.min(energyArray[i - 1][j - 1],
 								Math.min(energyArray[i - 1][j], energyArray[i - 1][j + 1]));
 
-						// Add direction based on if last pixel is up-left (y - 1)
-						if (minimum == energyArray[i - 1][j - 1])
-							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
-
-						// straight left (y)
-						else if (minimum == energyArray[i - 1][j])
+						// Add direction based on if last pixel is straight-left (y)
+						if (minimum == energyArray[i - 1][j])
 							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 0);
+						// up-left (y-1)
+						else if (minimum == energyArray[i - 1][j - 1])
+							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
 
 						// or down-left (y + 1)
 						else
