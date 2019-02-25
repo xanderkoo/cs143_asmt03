@@ -297,6 +297,8 @@ public class SeamCarving {
 		int minIndex = 0;
 		double min = pathArray[pathArray.length - 1][minIndex].getCumulPathEnergy();
 		for (int j = 0; j < pathArray[pathArray.length - 1].length; j++) {
+
+			System.out.println(minIndex + ", " + pathArray[pathArray.length - 1][j].getCumulPathEnergy());
 			if (pathArray[pathArray.length - 1][j].getCumulPathEnergy() < min) {
 				minIndex = j;
 				min = pathArray[pathArray.length - 1][j].getCumulPathEnergy();
@@ -317,6 +319,8 @@ public class SeamCarving {
 
 		// Trace the path back and color the seam red
 		for (int i = pathArray.length; i > 0; i--) {
+			System.out.println();
+			
 			// Set pixel red
 			image.setRGB(i - 1, nextIndex, Color.RED.getRGB());
 
@@ -325,6 +329,7 @@ public class SeamCarving {
 
 			// Update direction to go to next
 			nextDir = pathArray[i - 1][nextIndex].getDirection();
+			System.out.print(pathArray[i - 1][nextIndex].getCumulPathEnergy());
 		}
 
 		// TODO: i am going to die
