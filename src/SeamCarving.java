@@ -203,11 +203,11 @@ public class SeamCarving {
 		// width and height of array with energy values
 		int width = energyArray.length;
 		int height = energyArray[0].length;
-		
+
 		System.out.println(width + "," + height);
 
 		// variable to keep track of minimum energy value of path
-		double minimum;
+		double minimum = 0;
 
 		// 2D array to store path energy values and direction (-1, 0, 1)
 		SeamFindingPair[][] pathEnergyDirArray = new SeamFindingPair[width][height];
@@ -230,10 +230,10 @@ public class SeamCarving {
 
 						// Previous pixel with the minimum cumulative path energy is either to the left
 						// or down-left
-						minimum = Math.min(energyArray[i - 1][j], energyArray[i - 1][j + 1]);
+						minimum = Math.min(pathEnergyDirArray[i - 1][j].getCumulPathEnergy(), pathEnergyDirArray[i - 1][j + 1].getCumulPathEnergy());
 
 						// Add direction based on if last pixel is left...
-						if (minimum == energyArray[i - 1][j])
+						if (minimum == pathEnergyDirArray[i - 1][j].getCumulPathEnergy())
 							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 0);
 
 						// or down-left (y + 1)
@@ -248,10 +248,10 @@ public class SeamCarving {
 
 						// Previous pixel with the minimum cumulative path energy is either to the left
 						// or up-left
-						minimum = Math.min(energyArray[i - 1][j], energyArray[i - 1][j - 1]);
+						minimum = Math.min(pathEnergyDirArray[i - 1][j].getCumulPathEnergy(), pathEnergyDirArray[i - 1][j - 1].getCumulPathEnergy());
 
 						// Add direction based on if last pixel is left...
-						if (minimum == energyArray[i - 1][j])
+						if (minimum == pathEnergyDirArray[i - 1][j].getCumulPathEnergy())
 							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 0);
 
 						// or up-left (y - 1)
@@ -266,14 +266,15 @@ public class SeamCarving {
 
 						// Previous pixel with the minimum cumulative path energy is to the up-left,
 						// left, or down-left
-						minimum = Math.min(energyArray[i - 1][j - 1],
-								Math.min(energyArray[i - 1][j], energyArray[i - 1][j + 1]));
+						minimum = Math.min(pathEnergyDirArray[i - 1][j - 1].getCumulPathEnergy(),
+								Math.min(pathEnergyDirArray[i - 1][j].getCumulPathEnergy(),
+										pathEnergyDirArray[i - 1][j + 1].getCumulPathEnergy()));
 
 						// Add direction based on if last pixel is straight-left (y)
-						if (minimum == energyArray[i - 1][j])
+						if (minimum == pathEnergyDirArray[i - 1][j].getCumulPathEnergy())
 							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 0);
 						// up-left (y-1)
-						else if (minimum == energyArray[i - 1][j - 1])
+						else if (minimum == pathEnergyDirArray[i - 1][j - 1].getCumulPathEnergy())
 							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
 
 						// or down-left (y + 1)
@@ -285,106 +286,11 @@ public class SeamCarving {
 					// and assign the cumulative value to new 2D array
 					pathEnergyDirArray[i][j].setCumulPathEnergy(energyArray[i][j] + minimum);
 
-					System.out.print("<" + i + "," + j + ">\t");
 				}
-				System.out.println();
 			}
 		}
 		return pathEnergyDirArray;
 	}
-	
-//	private static SeamFindingPair[][] findHorizontalSeam(double[][] energyArray) {
-//		// width and height of array with energy values
-//		int width = energyArray.length;
-//		int height = energyArray[0].length;
-//
-//		// variable to keep track of minimum energy value of path
-//		double minimum;
-//
-//		// 2D array to store path energy values and direction (-1, 0, 1)
-//		SeamFindingPair[][] pathEnergyDirArray = new SeamFindingPair[width][height];
-//
-//		// Loops through energy array to find smallest value of the adjacent pixels
-//		for (int i = 0; i < width; i++) {
-//			for (int j = 0; j < height; j++) {
-//
-//				// If leftmost column...
-//				if (i == 0) {
-//					// Since these pixels are the beginning of the path, set path energy to the
-//					// energy of that pixel. Direction defaults to 0.
-//					pathEnergyDirArray[i][j] = new SeamFindingPair(energyArray[i][j], 0);
-//				}
-//
-//				// Else...
-//				else {
-//					// If in the top row...
-//					if (j == 0) {
-//
-//						// Previous pixel with the minimum cumulative path energy is either to the left
-//						// or down-left
-//						minimum = Math.min(energyArray[i - 1][j], energyArray[i - 1][j + 1]);
-//
-//						// Add direction based on if last pixel is left...
-//						if (minimum == energyArray[i - 1][j])
-//							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 0);
-//
-//						// or down-left (y + 1)
-//						else
-//							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 1);
-//
-//						// NOTE: cumulative path energy assigned later
-//					}
-//
-//					// If in the bottom row...
-//					else if (j == (height - 1)) {
-//
-//						// Previous pixel with the minimum cumulative path energy is either to the left
-//						// or up-left
-//						minimum = Math.min(energyArray[i - 1][j], energyArray[i - 1][j - 1]);
-//
-//						// Add direction based on if last pixel is left...
-//						if (minimum == energyArray[i - 1][j])
-//							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 0);
-//
-//						// or up-left (y - 1)
-//						else
-//							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
-//
-//						// NOTE: cumulative path energy assigned later
-//					}
-//
-//					// If not the bottom or top row...
-//					else {
-//
-//						// Previous pixel with the minimum cumulative path energy is to the up-left,
-//						// left, or down-left
-//						minimum = Math.min(energyArray[i - 1][j - 1],
-//								Math.min(energyArray[i - 1][j], energyArray[i - 1][j + 1]));
-//
-//						// Add direction based on if last pixel is straight-left (y)
-//						if (minimum == energyArray[i - 1][j])
-//							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 0);
-//						// up-left (y-1)
-//						else if (minimum == energyArray[i - 1][j - 1])
-//							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
-//
-//						// or down-left (y + 1)
-//						else
-//							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 1);
-//					}
-//
-//					// add the minimum value to the energy value of the cell
-//					// and assign the cumulative value to new 2D array
-//					pathEnergyDirArray[i][j].setCumulPathEnergy(energyArray[i][j] + minimum);
-//
-//					System.out.print("<" + i + "," + j + ">\t");
-//				}
-//				System.out.println();
-//			}
-//		}
-//		return pathEnergyDirArray;
-//	}
-
 
 	public static void retraceHorizontal(SeamFindingPair[][] pathArray, BufferedImage image) {
 
@@ -404,8 +310,6 @@ public class SeamCarving {
 			}
 		}
 
-		System.out.print("Minimum energy path, horizontal: " + min);
-
 		/*
 		 * Trace back that minimum energy path and re-color the corresponding pixels in
 		 * the image
@@ -415,10 +319,14 @@ public class SeamCarving {
 		// next pixel and next index
 		int nextDir = pathArray[pathArray.length - 1][minIndex].getDirection();
 		int nextIndex = minIndex;
+		
+		System.out.println("min: " + min);
+		System.out.println("minIndex: " + minIndex);
+		System.out.println(pathArray[pathArray.length - 1][minIndex]);
 
 		// Trace the path back and color the seam red
 		for (int i = pathArray.length; i > 0; i--) {
-			System.out.println();
+			System.out.println((int) pathArray[i - 1][nextIndex].getCumulPathEnergy());
 
 			// Set pixel red
 			image.setRGB(i - 1, nextIndex, Color.RED.getRGB());
@@ -428,7 +336,6 @@ public class SeamCarving {
 
 			// Update direction to go to next
 			nextDir = pathArray[i - 1][nextIndex].getDirection();
-			System.out.print((int) pathArray[i - 1][nextIndex].getCumulPathEnergy());
 		}
 
 		// TODO: i am going to die
@@ -486,13 +393,23 @@ public class SeamCarving {
 
 		System.out.println();
 
-		// Print path/dir array
-		for (int i = 0; i < cols; i++) {
-			for (int j = 0; j < rows; j++) {
-				System.out.print(pathArrayHoriz[i][j] + "\t");
-			}
-			System.out.println();
-		}
+//		// Print energy array
+//		for (int j = 0; j < rows; j++) {
+//			for (int i = 0; i < cols; i++) {
+//
+//				System.out.print((int) energyArray[i][j] + "\t");
+//			}
+//			System.out.println();
+//		}
+//
+//		// Print path/dir array
+//		for (int j = 0; j < rows; j++) {
+//			for (int i = 0; i < cols; i++) {
+//
+//				System.out.print(pathArrayHoriz[i][j] + "\t");
+//			}
+//			System.out.println();
+//		}
 
 		ImageIO.write(imageSeam, "PNG", fileSeam);
 
