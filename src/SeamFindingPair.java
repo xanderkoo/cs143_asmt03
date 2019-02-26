@@ -10,7 +10,7 @@ public class SeamFindingPair {
 	/**
 	 * create pair of minimum cumulative path energy and direction (-1, 0, 1)
 	 * 
-	 * @param energy minimum cumulative path energy
+	 * @param energy    minimum cumulative path energy
 	 * @param direction (-1, 0, 1)
 	 */
 	public SeamFindingPair(double energy, int direction) {
@@ -47,8 +47,8 @@ public class SeamFindingPair {
 	public void setDirection(int direction) {
 		this.direction = direction;
 	}
-	
+
 	public String toString() {
-		return "<" + energy + "," + direction +">";
+		return "<" + (int) energy + "," + direction + ">";
 	}
 }
