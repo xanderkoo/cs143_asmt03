@@ -1,54 +1,53 @@
 /**
- * Object for holding two numbers. For seam finding, the first int will be the
- * cumulative path energy and the second int will be the direction (-1, 0, 1)
+ * Object for holding two numbers
  */
 public class SeamFindingPair {
 
-	private double energy;
-	private int direction;
+	private double d;
+	private int i;
 
 	/**
-	 * create pair of minimum cumulative path energy and direction (-1, 0, 1)
+	 * create pair of double and int
 	 * 
-	 * @param energy    minimum cumulative path energy
-	 * @param direction (-1, 0, 1)
+	 * @param d double
+	 * @param i int
 	 */
-	public SeamFindingPair(double energy, int direction) {
-		this.energy = energy;
-		this.direction = direction;
-	}
-
-	/**
-	 * 
-	 * @return cumulative path energy, double
-	 */
-	public double getCumulPathEnergy() {
-		return this.energy;
+	public SeamFindingPair(double d, int i) {
+		this.d = d;
+		this.i = i;
 	}
 
 	/**
 	 * 
-	 * @return direction (-1, 0, 1), int
+	 * @return double
 	 */
-	public int getDirection() {
-		return this.direction;
+	public double getDouble() {
+		return this.d;
 	}
 
 	/**
-	 * sets cumulative path energy, double
+	 * 
+	 * @return int
 	 */
-	public void setCumulPathEnergy(double energy) {
-		this.energy = energy;
+	public int getInt() {
+		return this.i;
 	}
 
 	/**
-	 * sets direction (-1, 0, 1), int
+	 * sets double
 	 */
-	public void setDirection(int direction) {
-		this.direction = direction;
+	public void setDouble(double d) {
+		this.d = d;
+	}
+
+	/**
+	 * sets int
+	 */
+	public void setInt(int i) {
+		this.i = i;
 	}
 
 	public String toString() {
-		return "<" + (int) energy + "," + direction + ">";
+		return "<" + (int) d + "," + i + ">";
 	}
 }
