@@ -6,9 +6,13 @@ import java.awt.image.BufferedImage;
 import java.awt.Color;
 
 /**
+ * Runs a seam-carving algorithm for resizing (shrinking) images in the main
+ * method.
  * 
+ * @author aden-siebel
+ * @author akari-ishida
+ * @author xanderkoo
  */
-
 public class SeamCarving {
 
 	// RNG for tie-breakers
