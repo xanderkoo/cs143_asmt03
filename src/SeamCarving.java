@@ -379,7 +379,7 @@ public class SeamCarving {
 	public static Color[][] carveSeamVertical(SeamFindingPair[][] pathArray, Color[][] image) {
 
 		// Get index of min energy path
-		int minIndex = findMinSeamHorizontal(pathArray).getInt();
+		int minIndex = findMinSeamVertical(pathArray).getInt();
 
 		/*
 		 * Trace back that minimum energy path and re-color the corresponding pixels in
