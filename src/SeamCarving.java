@@ -307,10 +307,12 @@ public class SeamCarving {
 		 */
 		int minIndex = 0;
 		double min = pathArray[minIndex][pathArray[minIndex].length - 1].getDouble();
-		for (int i = 0; i < pathArray[pathArray.length - 1].length; i++) {
-			if (pathArray[pathArray.length - 1][i].getDouble() < min) {
+		for (int i = 0; i < pathArray.length; i++) {
+			if (pathArray[i][pathArray[i].length - 1].getDouble() < min) {
 				minIndex = i;
-				min = pathArray[i][pathArray[minIndex].length - 1].getDouble();
+				min = pathArray[i]
+						[pathArray
+						 [minIndex].length- 1].getDouble();
 			}
 		}
 
@@ -354,7 +356,7 @@ public class SeamCarving {
 
 		// Keep track of direction (-1, 0, 1 for up-left, straight-up, up-right) of next
 		// pixel and next index
-		int nextDir = pathArray[pathArray[0].length - 1][minIndex].getInt();
+		int nextDir = pathArray[minIndex][pathArray[0].length - 1].getInt();
 		int nextIndex = minIndex;
 
 		// Trace the path back and remove the seam
@@ -479,138 +481,147 @@ public class SeamCarving {
 
 	/**
 	 * 
-	 * @param args args[0] = deltaX, args[1] = deltaY
+	 * @param args args[0]: horizontal reduction, args[1]: vertical reduction,
+	 *             args[2]: number of images
 	 * @throws IOException              if file is not found
 	 * @throws IllegalArgumentException if deltaX >= width or deltaY >= length
 	 */
 	public static void main(String args[]) throws IOException {
 
-		File file = new File("./" + args[2]);
-		BufferedImage imageSource = ImageIO.read(file);
-		int cols = imageSource.getWidth();
-		int rows = imageSource.getHeight();
-		int deltaX = Integer.parseInt(args[0]);
-		int deltaY = Integer.parseInt(args[1]);
+		for (int imgNum = 0; imgNum < Integer.parseInt(args[2]); imgNum++) {
 
-		if (deltaX >= cols || deltaX < 0 || deltaY >= rows || deltaY < 0)
-			throw new IllegalArgumentException("Too much or negative shrinkage");
+			// File should be named "image<N>.jpg" s.t. <N> is elt of [0, number of images)
+			File file = new File("./image" + imgNum + ".jpg");
+			BufferedImage imageSource = ImageIO.read(file);
 
-		System.out.printf("%d by %d pixels\n", rows, cols);
+			// Gets cols (width) and rows (height), and how much to shrink vertically and
+			// horizontally
+			int cols = imageSource.getWidth();
+			int rows = imageSource.getHeight();
+			int deltaX = Integer.parseInt(args[0]);
+			int deltaY = Integer.parseInt(args[1]);
+			if (deltaX >= cols || deltaX < 0 || deltaY >= rows || deltaY < 0)
+				throw new IllegalArgumentException("Too much or negative shrinkage");
 
-		/* Read into an array of rgb values */
-		Color image[][] = new Color[cols][rows];
-		for (int i = 0; i < cols; i++) {
-			for (int j = 0; j < rows; j++) {
-				int color = imageSource.getRGB(i, j);
-				int red = (color >> 16) & 0xff;
-				int green = (color >> 8) & 0xff;
-				int blue = (color) & 0xff;
-				image[i][j] = new Color(red, green, blue);
+			// Print image dimensions
+			System.out.printf("%d by %d pixels\n", rows, cols);
+
+			/* Read into an array of rgb values */
+			Color image[][] = new Color[cols][rows];
+			for (int i = 0; i < cols; i++) {
+				for (int j = 0; j < rows; j++) {
+					int color = imageSource.getRGB(i, j);
+					int red = (color >> 16) & 0xff;
+					int green = (color >> 8) & 0xff;
+					int blue = (color) & 0xff;
+					image[i][j] = new Color(red, green, blue);
+				}
 			}
-		}
 
-		/* Generate energy array, save image in grayscale */
-		double[][] energyArray = energyFunction(image);
-		BufferedImage imageEnergy = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
-		File fileEnergy = new File("./image_energy.png");
-		for (int i = 0; i < cols; i++) {
-			for (int j = 0; j < rows; j++) {
-				int r = 255 - (int) energyArray[i][j];
-				int g = 255 - (int) energyArray[i][j];
-				int b = 255 - (int) energyArray[i][j];
-				int col = (r << 16) | (g << 8) | b;
-				imageEnergy.setRGB(i, j, col);
-				System.out.print((int) energyArray[i][j] + "\t");
+			/* Generate energy array, save image in grayscale */
+			double[][] energyArray = energyFunction(image);
+			BufferedImage imageEnergy = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
+			File fileEnergy = new File("./energy" + imgNum + ".png");
+			for (int i = 0; i < cols; i++) {
+				for (int j = 0; j < rows; j++) {
+					int r = 255 - (int) energyArray[i][j];
+					int g = 255 - (int) energyArray[i][j];
+					int b = 255 - (int) energyArray[i][j];
+					int col = (r << 16) | (g << 8) | b;
+					imageEnergy.setRGB(i, j, col);
+//					System.out.print((int) energyArray[i][j] + "\t");
 
+				}
+//				System.out.println();
 			}
-			System.out.println();
-		}
-		ImageIO.write(imageEnergy, "PNG", fileEnergy);
+			ImageIO.write(imageEnergy, "PNG", fileEnergy);
 
-//		/* Save an image of the image with a seam */
-//		BufferedImage imageSeam = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
-//		File fileSeam = new File("./image_seam.png");
-//		// Copies the energy representation of the photo into the buffered image
-//		for (int i = 0; i < cols; i++) {
-//			for (int j = 0; j < rows; j++) {
-//				imageSeam.setRGB(i, j, imageEnergy.getRGB(i, j));
+//			/* Save an image of the image with a seam */
+//			BufferedImage imageSeam = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
+//			File fileSeam = new File("./seam" + imgNum + ".png");
+//			// Copies the energy representation of the photo into the buffered image
+//			for (int i = 0; i < cols; i++) {
+//				for (int j = 0; j < rows; j++) {
+//					imageSeam.setRGB(i, j, imageEnergy.getRGB(i, j));
+//				}
 //			}
-//		}
-//		// Draws the seam
-//		SeamFindingPair[][] pathArrayHoriz = findHorizontalSeam(energyArray);
-//		drawSeamHorizontal(pathArrayHoriz, imageSeam);
-//
-//		ImageIO.write(imageSeam, "PNG", fileSeam);
+//			// Draws the seam
+//			SeamFindingPair[][] pathArrayHoriz = findHorizontalSeam(energyArray);
+//			drawSeamHorizontal(pathArrayHoriz, imageSeam);
+			//
+//			ImageIO.write(imageSeam, "PNG", fileSeam);
 
-		int deltaXt = deltaX;
-		int deltaYt = deltaY;
+			int deltaXt = deltaX;
+			int deltaYt = deltaY;
 
-		Color[][] resized = image;
-		double[][] energyArr;
-		SeamFindingPair[][] pathArrayV;
-		SeamFindingPair[][] pathArrayH;
+			Color[][] resized = image;
+			double[][] energyArr;
+			SeamFindingPair[][] pathArrayV;
+			SeamFindingPair[][] pathArrayH;
 
-		SeamFindingPair mPathV;
-		SeamFindingPair mPathH;
+			SeamFindingPair mPathV;
+			SeamFindingPair mPathH;
 
-		while (deltaXt > 0 || deltaYt > 0) {
-			energyArr = energyFunction(resized);
-			pathArrayV = findVerticalSeams(energyArr);
-			pathArrayH = findHorizontalSeams(energyArr);
+			while (deltaXt > 0 || deltaYt > 0) {
+				energyArr = energyFunction(resized);
+				pathArrayV = findVerticalSeams(energyArr);
+				pathArrayH = findHorizontalSeams(energyArr);
 
-			mPathV = findMinSeamVertical(pathArrayV);
-			mPathH = findMinSeamHorizontal(pathArrayH);
+				mPathV = findMinSeamVertical(pathArrayV);
+				mPathH = findMinSeamHorizontal(pathArrayH);
 
-			if (deltaXt == 0) {
-				resized = carveSeamVertical(pathArrayV, resized);
-				deltaYt--;
-				System.out.println("V carved");
+				if (deltaXt == 0) {
+					resized = carveSeamVertical(pathArrayV, resized);
+					deltaYt--;
+					System.out.println("V carved");
 
-			} else if (deltaYt == 0) {
-				resized = carveSeamHorizontal(pathArrayH, resized);
-				deltaXt--;
-				System.out.println("H carved");
+				} else if (deltaYt == 0) {
+					resized = carveSeamHorizontal(pathArrayH, resized);
+					deltaXt--;
+					System.out.println("H carved");
 
-			} else if (mPathV.getDouble() < mPathH.getDouble()) {
-				resized = carveSeamVertical(pathArrayV, resized);
-				deltaYt--;
-				System.out.println("V carved");
-			} else {
-				resized = carveSeamHorizontal(pathArrayH, resized);
-				deltaXt--;
-				System.out.println("H carved");
+				} else if (mPathV.getDouble() < mPathH.getDouble()) {
+					resized = carveSeamVertical(pathArrayV, resized);
+					deltaYt--;
+					System.out.println("V carved");
+				} else {
+					resized = carveSeamHorizontal(pathArrayH, resized);
+					deltaXt--;
+					System.out.println("H carved");
+				}
+				// System.out.println(mPathH.getDouble() + "deltaX, " + mPathV.getDouble() +
+				// "delta Y");
+
 			}
-			//System.out.println(mPathH.getDouble() + "deltaX, " + mPathV.getDouble() + "delta Y");
 
-		}
+//			for (int t = 0; t < deltaY; t++) {
+//				energyArr = energyFunction(resizedV);
+//				pathArrayV = findVerticalSeams(energyArr);
+//				resizedV = carveSeamVertical(pathArrayV, resizedV);
+//			}
+//			
+//			Color[][] resizedH = image;
+//			double[][] energyArr;
+//			SeamFindingPair[][] pathArrayH;
+			//
+//			for (int t = 0; t < deltaX; t++) {
+//				energyArr = energyFunction(resizedH);
+//				pathArrayH = findHorizontalSeams(energyArr);
+//				resizedH = carveSeamHorizontal(pathArrayH, resizedH);
+//			}
 
-//		for (int t = 0; t < deltaY; t++) {
-//			energyArr = energyFunction(resizedV);
-//			pathArrayV = findVerticalSeams(energyArr);
-//			resizedV = carveSeamVertical(pathArrayV, resizedV);
-//		}
-//		
-//		Color[][] resizedH = image;
-//		double[][] energyArr;
-//		SeamFindingPair[][] pathArrayH;
-//
-//		for (int t = 0; t < deltaX; t++) {
-//			energyArr = energyFunction(resizedH);
-//			pathArrayH = findHorizontalSeams(energyArr);
-//			resizedH = carveSeamHorizontal(pathArrayH, resizedH);
-//		}
-
-		// Copies the energy representation of the photo into the buffered image
-		BufferedImage imageResized = new BufferedImage(cols - deltaY, rows - deltaX, BufferedImage.TYPE_INT_RGB);
-		File fileResized = new File("./" + args[2].substring(0, 7) + "_resized.png");
-		for (int i = 0; i < cols - deltaY; i++) {
-			for (int j = 0; j < rows - deltaX; j++) {
-				imageResized.setRGB(i, j, resized[i][j].getRGB());
+			// Copies the energy representation of the photo into the buffered image
+			BufferedImage imageResized = new BufferedImage(cols - deltaY, rows - deltaX, BufferedImage.TYPE_INT_RGB);
+			File fileResized = new File("./resized" + imgNum + ".png");
+			for (int i = 0; i < cols - deltaY; i++) {
+				for (int j = 0; j < rows - deltaX; j++) {
+					imageResized.setRGB(i, j, resized[i][j].getRGB());
+				}
 			}
-		}
 
-		ImageIO.write(imageResized, "PNG", fileResized);
-		System.out.println("Process successfully completed.");
+			ImageIO.write(imageResized, "PNG", fileResized);
+			System.out.println("Process successfully completed.");
+		}
 
 	}
 }
