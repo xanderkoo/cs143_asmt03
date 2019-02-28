@@ -129,7 +129,6 @@ public class SeamCarving {
 
 						// Previous pixel with the minimum cumulative path energy is either up or
 						// up-right
-						System.out.println(i + "," + j);
 						minimum = Math.min(pathEnergyDirArray[i][j - 1].getDouble(),
 								pathEnergyDirArray[i + 1][j - 1].getDouble());
 
@@ -362,7 +361,7 @@ public class SeamCarving {
 		for (int j = pathArray[0].length; j > 0; j--) {
 
 			// Removes pixels at seam
-			image[j - 1][nextIndex] = null;
+			image[nextIndex][j - 1] = null;
 
 			// Update index of next pixel based on the direction
 			nextIndex += nextDir;
@@ -387,7 +386,7 @@ public class SeamCarving {
 			}
 
 			// Skip the seam and copy the rest of the pixels into the new array
-			while (j < image[0].length - 1) {
+			while (i < image.length - 1) {
 				resized[i][j] = image[++i][j];
 			}
 		}
@@ -486,7 +485,7 @@ public class SeamCarving {
 	 */
 	public static void main(String args[]) throws IOException {
 
-		File file = new File("./image_original.jpg");
+		File file = new File("./" + args[2]);
 		BufferedImage imageSource = ImageIO.read(file);
 		int cols = imageSource.getWidth();
 		int rows = imageSource.getHeight();
@@ -543,15 +542,53 @@ public class SeamCarving {
 //
 //		ImageIO.write(imageSeam, "PNG", fileSeam);
 
-		Color[][] resizedV = image;
+		int deltaXt = deltaX;
+		int deltaYt = deltaY;
+
+		Color[][] resized = image;
 		double[][] energyArr;
 		SeamFindingPair[][] pathArrayV;
+		SeamFindingPair[][] pathArrayH;
 
-		for (int t = 0; t < deltaY; t++) {
-			energyArr = energyFunction(resizedV);
+		SeamFindingPair mPathV;
+		SeamFindingPair mPathH;
+
+		while (deltaXt > 0 || deltaYt > 0) {
+			energyArr = energyFunction(resized);
 			pathArrayV = findVerticalSeams(energyArr);
-			resizedV = carveSeamVertical(pathArrayV, resizedV);
+			pathArrayH = findHorizontalSeams(energyArr);
+
+			mPathV = findMinSeamVertical(pathArrayV);
+			mPathH = findMinSeamHorizontal(pathArrayH);
+
+			if (deltaXt == 0) {
+				resized = carveSeamVertical(pathArrayV, resized);
+				deltaYt--;
+				System.out.println("V carved");
+
+			} else if (deltaYt == 0) {
+				resized = carveSeamHorizontal(pathArrayH, resized);
+				deltaXt--;
+				System.out.println("H carved");
+
+			} else if (mPathV.getDouble() < mPathH.getDouble()) {
+				resized = carveSeamVertical(pathArrayV, resized);
+				deltaYt--;
+				System.out.println("V carved");
+			} else {
+				resized = carveSeamHorizontal(pathArrayH, resized);
+				deltaXt--;
+				System.out.println("H carved");
+			}
+			//System.out.println(mPathH.getDouble() + "deltaX, " + mPathV.getDouble() + "delta Y");
+
 		}
+
+//		for (int t = 0; t < deltaY; t++) {
+//			energyArr = energyFunction(resizedV);
+//			pathArrayV = findVerticalSeams(energyArr);
+//			resizedV = carveSeamVertical(pathArrayV, resizedV);
+//		}
 //		
 //		Color[][] resizedH = image;
 //		double[][] energyArr;
@@ -565,14 +602,15 @@ public class SeamCarving {
 
 		// Copies the energy representation of the photo into the buffered image
 		BufferedImage imageResized = new BufferedImage(cols - deltaY, rows - deltaX, BufferedImage.TYPE_INT_RGB);
-		File fileResized = new File("./image_resized.png");
+		File fileResized = new File("./" + args[2].substring(0, 7) + "_resized.png");
 		for (int i = 0; i < cols - deltaY; i++) {
 			for (int j = 0; j < rows - deltaX; j++) {
-				imageResized.setRGB(i, j, resizedV[i][j].getRGB());
+				imageResized.setRGB(i, j, resized[i][j].getRGB());
 			}
 		}
 
 		ImageIO.write(imageResized, "PNG", fileResized);
+		System.out.println("Process successfully completed.");
 
 	}
 }
