@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.Random;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.awt.Color;
@@ -8,6 +10,8 @@ import java.awt.Color;
  */
 
 public class SeamCarving {
+
+	private static Random random = new Random();
 
 	/**
 	 * Takes in an array of RGB values (Color) corresponding to the inputed image,
@@ -162,7 +166,7 @@ public class SeamCarving {
 						// NOTE: cumulative path energy assigned later
 					}
 
-					// If not the left or right clumns...
+					// If not the left or right columns...
 					else {
 
 						// Previous pixel with the minimum cumulative path energy is to the up-left,
@@ -174,13 +178,26 @@ public class SeamCarving {
 						// Add direction based on if last pixel is straight-up (x)
 						if (minimum == pathEnergyDirArray[i][j - 1].getDouble())
 							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 0);
-						// up-left (x - 1)
-						else if (minimum == pathEnergyDirArray[i - 1][j - 1].getDouble())
-							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
 
-						// or up-right (x + 1)
-						else
-							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 1);
+						// Randomize checking up-left and up-right in case they are both the minimum
+						else if (random.nextInt(2) == 0) {
+							// up-left (x - 1)
+							if (minimum == pathEnergyDirArray[i - 1][j - 1].getDouble())
+								pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
+
+							// or up-right (x + 1)
+							else
+								pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, +1);
+						} else {
+							// up-right (x + 1)
+							if (minimum == pathEnergyDirArray[i + 1][j - 1].getDouble())
+								pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, +1);
+
+							// or up-left (x - 1)
+							else
+								pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
+						}
+
 					}
 
 					// add the minimum value to the energy value of the cell
@@ -276,13 +293,26 @@ public class SeamCarving {
 						// Add direction based on if last pixel is straight-left (y)
 						if (minimum == pathEnergyDirArray[i - 1][j].getDouble())
 							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 0);
-						// up-left (y-1)
-						else if (minimum == pathEnergyDirArray[i - 1][j - 1].getDouble())
-							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
+						
+						// Randomize checking up-left and up-right in case they are both the minimum
+						else if (random.nextInt(2) == 0) {
+							// up-left (y - 1)
+							if (minimum == pathEnergyDirArray[i - 1][j - 1].getDouble())
+								pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
 
-						// or down-left (y + 1)
-						else
-							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 1);
+							// or down-left (y + 1)
+							else
+								pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, +1);
+						} else {
+							// down-left (y + 1)
+							if (minimum == pathEnergyDirArray[i - 1][j + 1].getDouble())
+								pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, +1);
+
+							// or up-left (y - 1)
+							else
+								pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, -1);
+						}
+
 					}
 
 					// add the minimum value to the energy value of the cell
@@ -310,9 +340,7 @@ public class SeamCarving {
 		for (int i = 0; i < pathArray.length; i++) {
 			if (pathArray[i][pathArray[i].length - 1].getDouble() < min) {
 				minIndex = i;
-				min = pathArray[i]
-						[pathArray
-						 [minIndex].length- 1].getDouble();
+				min = pathArray[i][pathArray[minIndex].length - 1].getDouble();
 			}
 		}
 
@@ -481,7 +509,7 @@ public class SeamCarving {
 
 	/**
 	 * 
-	 * @param args args[0]: horizontal reduction, args[1]: vertical reduction,
+	 * @param args args[0]: horiz reduction in px, args[1]: vert reduction in px,
 	 *             args[2]: number of images
 	 * @throws IOException              if file is not found
 	 * @throws IllegalArgumentException if deltaX >= width or deltaY >= length
@@ -492,15 +520,16 @@ public class SeamCarving {
 
 			// File should be named "image<N>.jpg" s.t. <N> is elt of [0, number of images)
 			File file = new File("./image" + imgNum + ".jpg");
+			System.out.println("./image" + imgNum + ".jpg");
 			BufferedImage imageSource = ImageIO.read(file);
 
 			// Gets cols (width) and rows (height), and how much to shrink vertically and
 			// horizontally
 			int cols = imageSource.getWidth();
 			int rows = imageSource.getHeight();
-			int deltaX = Integer.parseInt(args[0]);
-			int deltaY = Integer.parseInt(args[1]);
-			if (deltaX >= cols || deltaX < 0 || deltaY >= rows || deltaY < 0)
+			int deltaVert = Integer.parseInt(args[0]);
+			int deltaHoriz = Integer.parseInt(args[1]);
+			if (deltaVert >= cols || deltaVert < 0 || deltaHoriz >= rows || deltaHoriz < 0)
 				throw new IllegalArgumentException("Too much or negative shrinkage");
 
 			// Print image dimensions
@@ -536,33 +565,39 @@ public class SeamCarving {
 			}
 			ImageIO.write(imageEnergy, "PNG", fileEnergy);
 
-//			/* Save an image of the image with a seam */
-//			BufferedImage imageSeam = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
-//			File fileSeam = new File("./seam" + imgNum + ".png");
-//			// Copies the energy representation of the photo into the buffered image
-//			for (int i = 0; i < cols; i++) {
-//				for (int j = 0; j < rows; j++) {
-//					imageSeam.setRGB(i, j, imageEnergy.getRGB(i, j));
-//				}
-//			}
-//			// Draws the seam
-//			SeamFindingPair[][] pathArrayHoriz = findHorizontalSeam(energyArray);
-//			drawSeamHorizontal(pathArrayHoriz, imageSeam);
-			//
-//			ImageIO.write(imageSeam, "PNG", fileSeam);
+			/* Save an image of the image with a seam */
+			BufferedImage imageSeam = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
+			File fileSeam = new File("./seam" + imgNum + ".png");
+			// Copies the energy representation of the photo into the buffered image
+			for (int i = 0; i < cols; i++) {
+				for (int j = 0; j < rows; j++) {
+					imageSeam.setRGB(i, j, imageEnergy.getRGB(i, j));
+				}
+			}
+			// Draws the seam
+			SeamFindingPair[][] pathArrayHoriz = findHorizontalSeams(energyArray);
+			drawSeamHorizontal(pathArrayHoriz, imageSeam);
+			
+			ImageIO.write(imageSeam, "PNG", fileSeam);
 
-			int deltaXt = deltaX;
-			int deltaYt = deltaY;
+			// Save pixels in x and y to shrink
+			int deltaVt = deltaVert;
+			int deltaHt = deltaHoriz;
 
-			Color[][] resized = image;
+			// Declare variables to prepare for the while loop
+			Color[][] resized = image.clone(); // instantiate this one as our original image
 			double[][] energyArr;
 			SeamFindingPair[][] pathArrayV;
 			SeamFindingPair[][] pathArrayH;
-
 			SeamFindingPair mPathV;
 			SeamFindingPair mPathH;
 
-			while (deltaXt > 0 || deltaYt > 0) {
+			System.out.println("Carving: ");
+
+			// Keep going until we are done with the horizontal and vertical carving
+			while (deltaVt > 0 || deltaHt > 0) {
+
+				// Energy
 				energyArr = energyFunction(resized);
 				pathArrayV = findVerticalSeams(energyArr);
 				pathArrayH = findHorizontalSeams(energyArr);
@@ -570,51 +605,36 @@ public class SeamCarving {
 				mPathV = findMinSeamVertical(pathArrayV);
 				mPathH = findMinSeamHorizontal(pathArrayH);
 
-				if (deltaXt == 0) {
+				if (deltaVt == 0) {
 					resized = carveSeamVertical(pathArrayV, resized);
-					deltaYt--;
-					System.out.println("V carved");
+					deltaHt--;
+					System.out.print("V ");
 
-				} else if (deltaYt == 0) {
+				} else if (deltaHt == 0) {
 					resized = carveSeamHorizontal(pathArrayH, resized);
-					deltaXt--;
-					System.out.println("H carved");
+					deltaVt--;
+					System.out.print("H ");
 
 				} else if (mPathV.getDouble() < mPathH.getDouble()) {
 					resized = carveSeamVertical(pathArrayV, resized);
-					deltaYt--;
-					System.out.println("V carved");
+					deltaHt--;
+					System.out.print("V ");
 				} else {
 					resized = carveSeamHorizontal(pathArrayH, resized);
-					deltaXt--;
-					System.out.println("H carved");
+					deltaVt--;
+					System.out.print("H ");
 				}
-				// System.out.println(mPathH.getDouble() + "deltaX, " + mPathV.getDouble() +
-				// "delta Y");
 
 			}
 
-//			for (int t = 0; t < deltaY; t++) {
-//				energyArr = energyFunction(resizedV);
-//				pathArrayV = findVerticalSeams(energyArr);
-//				resizedV = carveSeamVertical(pathArrayV, resizedV);
-//			}
-//			
-//			Color[][] resizedH = image;
-//			double[][] energyArr;
-//			SeamFindingPair[][] pathArrayH;
-			//
-//			for (int t = 0; t < deltaX; t++) {
-//				energyArr = energyFunction(resizedH);
-//				pathArrayH = findHorizontalSeams(energyArr);
-//				resizedH = carveSeamHorizontal(pathArrayH, resizedH);
-//			}
+			System.out.println();
 
 			// Copies the energy representation of the photo into the buffered image
-			BufferedImage imageResized = new BufferedImage(cols - deltaY, rows - deltaX, BufferedImage.TYPE_INT_RGB);
+			BufferedImage imageResized = new BufferedImage(cols - deltaHoriz, rows - deltaVert,
+					BufferedImage.TYPE_INT_RGB);
 			File fileResized = new File("./resized" + imgNum + ".png");
-			for (int i = 0; i < cols - deltaY; i++) {
-				for (int j = 0; j < rows - deltaX; j++) {
+			for (int i = 0; i < cols - deltaHoriz; i++) {
+				for (int j = 0; j < rows - deltaVert; j++) {
 					imageResized.setRGB(i, j, resized[i][j].getRGB());
 				}
 			}
