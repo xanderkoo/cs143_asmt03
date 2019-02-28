@@ -338,11 +338,13 @@ public class SeamCarving {
 		int minIndex = 0;
 		double min = pathArray[minIndex][pathArray[minIndex].length - 1].getDouble();
 		for (int i = 0; i < pathArray.length; i++) {
-			if (pathArray[i][pathArray[i].length - 1].getDouble() < min) {
+			if (pathArray[i][pathArray[i].length - 1].getDouble() <= min) {
 				minIndex = i;
 				min = pathArray[i][pathArray[minIndex].length - 1].getDouble();
 			}
 		}
+		
+		System.out.println(min + "," + minIndex);
 
 		// Return pair of least cumulative path energy and the corresponding index
 		return new SeamFindingPair(min, minIndex);
@@ -362,12 +364,14 @@ public class SeamCarving {
 		int minIndex = 0;
 		double min = pathArray[pathArray.length - 1][minIndex].getDouble();
 		for (int j = 0; j < pathArray[pathArray.length - 1].length; j++) {
-			if (pathArray[pathArray.length - 1][j].getDouble() < min) {
+			if (pathArray[pathArray.length - 1][j].getDouble() <= min) {
 				minIndex = j;
 				min = pathArray[pathArray.length - 1][j].getDouble();
 			}
 		}
 
+		System.out.println(min + "," + minIndex);
+		
 		// Return pair of least cumulative path energy and the corresponding index
 		return new SeamFindingPair(min, minIndex);
 	}
