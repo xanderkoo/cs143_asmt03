@@ -171,8 +171,8 @@ public class SeamCarving {
 
 						// Previous pixel with the minimum cumulative path energy is to the up-left,
 						// left, or down-left
-						minimum = Math.min(pathEnergyDirArray[i - 1][j - 1].getDouble(),
-								Math.min(pathEnergyDirArray[i][j - 1].getDouble(),
+						minimum = Math.min(pathEnergyDirArray[i][j - 1].getDouble(),
+								Math.min(pathEnergyDirArray[i - 1][j - 1].getDouble(),
 										pathEnergyDirArray[i + 1][j - 1].getDouble()));
 
 						// Add direction based on if last pixel is straight-up (x)
@@ -286,8 +286,8 @@ public class SeamCarving {
 
 						// Previous pixel with the minimum cumulative path energy is to the up-left,
 						// left, or down-left
-						minimum = Math.min(pathEnergyDirArray[i - 1][j - 1].getDouble(),
-								Math.min(pathEnergyDirArray[i - 1][j].getDouble(),
+						minimum = Math.min(pathEnergyDirArray[i - 1][j].getDouble(),
+								Math.min(pathEnergyDirArray[i - 1][j - 1].getDouble(),
 										pathEnergyDirArray[i - 1][j + 1].getDouble()));
 
 						// Add direction based on if last pixel is straight-left (y)
