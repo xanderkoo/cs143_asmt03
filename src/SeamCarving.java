@@ -596,6 +596,9 @@ public class SeamCarving {
 
 		for (int imgNum = 0; imgNum < Integer.parseInt(args[2]); imgNum++) {
 
+			// Begin timer
+			long startTime = System.nanoTime();
+
 			// File should be named "image<N>.jpg" s.t. <N> is elt of [0, number of images)
 
 			File file = new File("./image" + imgNum + ".jpg");
@@ -614,7 +617,7 @@ public class SeamCarving {
 					throw new IllegalArgumentException("Too much or negative shrinkage");
 
 				// Print image dimensions
-				System.out.printf("%d by %d pixels\n", rows, cols);
+				System.out.printf("%d by %d pixels\n", cols, rows);
 
 				/* Read into an array of rgb values */
 				Color image[][] = new Color[cols][rows];
@@ -639,7 +642,6 @@ public class SeamCarving {
 						int b = 255 - (int) energyArray[i][j];
 						int col = (r << 16) | (g << 8) | b;
 						imageEnergy.setRGB(i, j, col);
-
 					}
 				}
 				ImageIO.write(imageEnergy, "PNG", fileEnergy);
@@ -690,14 +692,14 @@ public class SeamCarving {
 					if (deltaYt == 0) {
 						resized = carveSeamVertical(pathArrayV, resized);
 						deltaXt--;
-						System.out.print("V ");
+						System.out.print("V");
 					}
 
 					// If no more vertical seams to be carved, carve horizontal seams
 					else if (deltaXt == 0) {
 						resized = carveSeamHorizontal(pathArrayH, resized);
 						deltaYt--;
-						System.out.print("H ");
+						System.out.print("H");
 					}
 
 					// If vertical seam has less cumulative energy than the horizontal, carve
@@ -705,7 +707,7 @@ public class SeamCarving {
 					else if (mPathV.getDouble() < mPathH.getDouble()) {
 						resized = carveSeamVertical(pathArrayV, resized);
 						deltaXt--;
-						System.out.print("V ");
+						System.out.print("V");
 					}
 
 					// If horizontal seam has less cumulative energy than the vertical, carve
@@ -713,9 +715,8 @@ public class SeamCarving {
 					else {
 						resized = carveSeamHorizontal(pathArrayH, resized);
 						deltaYt--;
-						System.out.print("H ");
+						System.out.print("H");
 					}
-
 				}
 
 				System.out.println();
@@ -730,12 +731,17 @@ public class SeamCarving {
 					}
 				}
 				ImageIO.write(imageResized, "PNG", fileResized);
-				System.out.println("Process successfully completed for" + file.getName());
+
+				// Stop timer
+				long endTime = System.nanoTime();
+
+				// Print time for each image to be carved in ms
+				System.out.println("Process successfully completed for " + file.getName() + " in "
+						+ (endTime - startTime) / 1000000 + " ms\n");
 
 			} catch (IOException e) {
 				throw e;
 			}
 		}
-
 	}
 }
