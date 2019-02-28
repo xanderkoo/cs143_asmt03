@@ -11,6 +11,7 @@ import java.awt.Color;
 
 public class SeamCarving {
 
+	// RNG for tie-breakers
 	private static Random random = new Random();
 
 	/**
@@ -293,7 +294,7 @@ public class SeamCarving {
 						// Add direction based on if last pixel is straight-left (y)
 						if (minimum == pathEnergyDirArray[i - 1][j].getDouble())
 							pathEnergyDirArray[i][j] = new SeamFindingPair(0.0, 0);
-						
+
 						// Randomize checking up-left and up-right in case they are both the minimum
 						else if (random.nextInt(2) == 0) {
 							// up-left (y - 1)
@@ -326,8 +327,11 @@ public class SeamCarving {
 	}
 
 	/**
+	 * Returns the SeamFindingPair (cumulative path energy and index of end of path)
+	 * corresponding with the minimum energy vertical path
 	 * 
-	 * @param pathArray
+	 * @param pathArray 2D array of SeamFindingPair, which contain cumulative path
+	 *                  energy and the direction of the least cumulative path energy
 	 * @return pair of least cumulative vertical path energy and corresponding index
 	 */
 	public static SeamFindingPair findMinSeamVertical(SeamFindingPair[][] pathArray) {
@@ -343,16 +347,17 @@ public class SeamCarving {
 				min = pathArray[i][pathArray[minIndex].length - 1].getDouble();
 			}
 		}
-		
-		System.out.println(min + "," + minIndex);
 
 		// Return pair of least cumulative path energy and the corresponding index
 		return new SeamFindingPair(min, minIndex);
 	}
 
 	/**
+	 * Returns the SeamFindingPair (cumulative path energy and index of end of path)
+	 * corresponding with the minimum energy horizontal path
 	 * 
-	 * @param pathArray
+	 * @param pathArray 2D array of SeamFindingPair, which contain cumulative path
+	 *                  energy and the direction of the least cumulative path energy
 	 * @return pair of least cumulative horizontal path energy and corresponding
 	 *         index
 	 */
@@ -370,19 +375,26 @@ public class SeamCarving {
 			}
 		}
 
-		System.out.println(min + "," + minIndex);
-		
 		// Return pair of least cumulative path energy and the corresponding index
 		return new SeamFindingPair(min, minIndex);
 	}
 
+	/**
+	 * Given a path array and a 2D array representing an image, finds the minimum
+	 * vertical seam, removes the pixels in the seam, and recombines the image.
+	 * 
+	 * @param pathArray 2D array of SeamFindingPair, which contain cumulative path
+	 *                  energy and the direction of the least cumulative path energy
+	 * @param image     2D array of Color objects representing the image
+	 * @return 2D array of Color objects, (i-1) * j, representing the resized image
+	 */
 	public static Color[][] carveSeamVertical(SeamFindingPair[][] pathArray, Color[][] image) {
 
 		// Get index of min energy path
 		int minIndex = findMinSeamVertical(pathArray).getInt();
 
 		/*
-		 * Trace back that minimum energy path and re-color the corresponding pixels in
+		 * Trace back that minimum energy path and remove the corresponding pixels in
 		 * the image
 		 */
 
@@ -429,13 +441,22 @@ public class SeamCarving {
 		return resized;
 	}
 
+	/**
+	 * Given a path array and a 2D array representing an image, finds the minimum
+	 * horizontal seam, removes the pixels in the seam, and recombines the image.
+	 * 
+	 * @param pathArray 2D array of SeamFindingPair, which contain cumulative path
+	 *                  energy and the direction of the least cumulative path energy
+	 * @param image     2D array of Color objects representing the image
+	 * @return 2D array of Color objects, i * (j-1), representing the resized image
+	 */
 	public static Color[][] carveSeamHorizontal(SeamFindingPair[][] pathArray, Color[][] image) {
 
 		// Get index of min energy path
 		int minIndex = findMinSeamHorizontal(pathArray).getInt();
 
 		/*
-		 * Trace back that minimum energy path and re-color the corresponding pixels in
+		 * Trace back that minimum energy path and remove the corresponding pixels in
 		 * the image
 		 */
 
@@ -482,6 +503,51 @@ public class SeamCarving {
 		return resized;
 	}
 
+	/**
+	 * Draws the minimum energy vertical seam corresponding to a path array onto an
+	 * image
+	 * 
+	 * @param pathArray array of cumulative path energy + directions
+	 * @param image     buffered image in question
+	 * @post vertical seam drawn onto buffered image
+	 */
+	public static void drawSeamVertical(SeamFindingPair[][] pathArray, BufferedImage image) {
+
+		// Get index of min energy path
+		int minIndex = findMinSeamVertical(pathArray).getInt();
+
+		/*
+		 * Trace back that minimum energy path and re-color the corresponding pixels in
+		 * the image
+		 */
+
+		// Keep track of direction (-1, 0, 1 for up-left, straight-up, up-right) of next
+		// pixel and next index
+		int nextDir = pathArray[minIndex][pathArray[0].length - 1].getInt();
+		int nextIndex = minIndex;
+
+		// Trace the path back and draw the seam
+		for (int j = pathArray[0].length; j > 0; j--) {
+
+			// Red line
+			image.setRGB(nextIndex, j - 1, Color.RED.getRGB());
+
+			// Update index of next pixel based on the direction
+			nextIndex += nextDir;
+
+			// Update direction to go to next
+			nextDir = pathArray[nextIndex][j - 1].getInt();
+		}
+	}
+
+	/**
+	 * Draws the minimum energy horizontal seam corresponding to a path array onto
+	 * an image
+	 * 
+	 * @param pathArray array of cumulative path energy + directions
+	 * @param image     buffered image in question
+	 * @post horizontal seam drawn onto buffered image
+	 */
 	public static void drawSeamHorizontal(SeamFindingPair[][] pathArray, BufferedImage image) {
 
 		// Get index of min energy path
@@ -497,10 +563,10 @@ public class SeamCarving {
 		int nextDir = pathArray[pathArray.length - 1][minIndex].getInt();
 		int nextIndex = minIndex;
 
-		// Trace the path back and color the seam red
+		// Trace the path back and remove the seam
 		for (int i = pathArray.length; i > 0; i--) {
 
-			// Set pixel red
+			// Red line
 			image.setRGB(i - 1, nextIndex, Color.RED.getRGB());
 
 			// Update index of next pixel based on the direction
@@ -513,6 +579,10 @@ public class SeamCarving {
 
 	/**
 	 * 
+	 * Main method. Takes images (named image0.jpg, image1.jpg, image2.jpg, ...) in
+	 * project folder and writes resized image, energy map, and the energy map with
+	 * demo seams as .PNG files into folder
+	 * 
 	 * @param args args[0]: horiz reduction in px, args[1]: vert reduction in px,
 	 *             args[2]: number of images
 	 * @throws IOException              if file is not found
@@ -523,128 +593,144 @@ public class SeamCarving {
 		for (int imgNum = 0; imgNum < Integer.parseInt(args[2]); imgNum++) {
 
 			// File should be named "image<N>.jpg" s.t. <N> is elt of [0, number of images)
+
 			File file = new File("./image" + imgNum + ".jpg");
+
 			System.out.println("./image" + imgNum + ".jpg");
-			BufferedImage imageSource = ImageIO.read(file);
+			try {
+				BufferedImage imageSource = ImageIO.read(file);
 
-			// Gets cols (width) and rows (height), and how much to shrink vertically and
-			// horizontally
-			int cols = imageSource.getWidth();
-			int rows = imageSource.getHeight();
-			int deltaVert = Integer.parseInt(args[0]);
-			int deltaHoriz = Integer.parseInt(args[1]);
-			if (deltaVert >= cols || deltaVert < 0 || deltaHoriz >= rows || deltaHoriz < 0)
-				throw new IllegalArgumentException("Too much or negative shrinkage");
+				// Gets cols (width) and rows (height), and how much to shrink vertically and
+				// horizontally
+				int cols = imageSource.getWidth();
+				int rows = imageSource.getHeight();
+				int deltaY = Integer.parseInt(args[0]);
+				int deltaX = Integer.parseInt(args[1]);
+				if (deltaY >= cols || deltaY < 0 || deltaX >= rows || deltaX < 0)
+					throw new IllegalArgumentException("Too much or negative shrinkage");
 
-			// Print image dimensions
-			System.out.printf("%d by %d pixels\n", rows, cols);
+				// Print image dimensions
+				System.out.printf("%d by %d pixels\n", rows, cols);
 
-			/* Read into an array of rgb values */
-			Color image[][] = new Color[cols][rows];
-			for (int i = 0; i < cols; i++) {
-				for (int j = 0; j < rows; j++) {
-					int color = imageSource.getRGB(i, j);
-					int red = (color >> 16) & 0xff;
-					int green = (color >> 8) & 0xff;
-					int blue = (color) & 0xff;
-					image[i][j] = new Color(red, green, blue);
-				}
-			}
-
-			/* Generate energy array, save image in grayscale */
-			double[][] energyArray = energyFunction(image);
-			BufferedImage imageEnergy = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
-			File fileEnergy = new File("./energy" + imgNum + ".png");
-			for (int i = 0; i < cols; i++) {
-				for (int j = 0; j < rows; j++) {
-					int r = 255 - (int) energyArray[i][j];
-					int g = 255 - (int) energyArray[i][j];
-					int b = 255 - (int) energyArray[i][j];
-					int col = (r << 16) | (g << 8) | b;
-					imageEnergy.setRGB(i, j, col);
-//					System.out.print((int) energyArray[i][j] + "\t");
-
-				}
-//				System.out.println();
-			}
-			ImageIO.write(imageEnergy, "PNG", fileEnergy);
-
-			/* Save an image of the image with a seam */
-			BufferedImage imageSeam = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
-			File fileSeam = new File("./seam" + imgNum + ".png");
-			// Copies the energy representation of the photo into the buffered image
-			for (int i = 0; i < cols; i++) {
-				for (int j = 0; j < rows; j++) {
-					imageSeam.setRGB(i, j, imageEnergy.getRGB(i, j));
-				}
-			}
-			// Draws the seam
-			SeamFindingPair[][] pathArrayHoriz = findHorizontalSeams(energyArray);
-			drawSeamHorizontal(pathArrayHoriz, imageSeam);
-			
-			ImageIO.write(imageSeam, "PNG", fileSeam);
-
-			// Save pixels in x and y to shrink
-			int deltaVt = deltaVert;
-			int deltaHt = deltaHoriz;
-
-			// Declare variables to prepare for the while loop
-			Color[][] resized = image.clone(); // instantiate this one as our original image
-			double[][] energyArr;
-			SeamFindingPair[][] pathArrayV;
-			SeamFindingPair[][] pathArrayH;
-			SeamFindingPair mPathV;
-			SeamFindingPair mPathH;
-
-			System.out.println("Carving: ");
-
-			// Keep going until we are done with the horizontal and vertical carving
-			while (deltaVt > 0 || deltaHt > 0) {
-
-				// Energy
-				energyArr = energyFunction(resized);
-				pathArrayV = findVerticalSeams(energyArr);
-				pathArrayH = findHorizontalSeams(energyArr);
-
-				mPathV = findMinSeamVertical(pathArrayV);
-				mPathH = findMinSeamHorizontal(pathArrayH);
-
-				if (deltaVt == 0) {
-					resized = carveSeamVertical(pathArrayV, resized);
-					deltaHt--;
-					System.out.print("V ");
-
-				} else if (deltaHt == 0) {
-					resized = carveSeamHorizontal(pathArrayH, resized);
-					deltaVt--;
-					System.out.print("H ");
-
-				} else if (mPathV.getDouble() < mPathH.getDouble()) {
-					resized = carveSeamVertical(pathArrayV, resized);
-					deltaHt--;
-					System.out.print("V ");
-				} else {
-					resized = carveSeamHorizontal(pathArrayH, resized);
-					deltaVt--;
-					System.out.print("H ");
+				/* Read into an array of rgb values */
+				Color image[][] = new Color[cols][rows];
+				for (int i = 0; i < cols; i++) {
+					for (int j = 0; j < rows; j++) {
+						int color = imageSource.getRGB(i, j);
+						int red = (color >> 16) & 0xff;
+						int green = (color >> 8) & 0xff;
+						int blue = (color) & 0xff;
+						image[i][j] = new Color(red, green, blue);
+					}
 				}
 
-			}
+				/* Generate energy array, save image in grayscale */
+				double[][] energyArray = energyFunction(image);
+				BufferedImage imageEnergy = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
+				File fileEnergy = new File("./energy" + imgNum + ".png");
+				for (int i = 0; i < cols; i++) {
+					for (int j = 0; j < rows; j++) {
+						int r = 255 - (int) energyArray[i][j];
+						int g = 255 - (int) energyArray[i][j];
+						int b = 255 - (int) energyArray[i][j];
+						int col = (r << 16) | (g << 8) | b;
+						imageEnergy.setRGB(i, j, col);
 
-			System.out.println();
-
-			// Copies the energy representation of the photo into the buffered image
-			BufferedImage imageResized = new BufferedImage(cols - deltaHoriz, rows - deltaVert,
-					BufferedImage.TYPE_INT_RGB);
-			File fileResized = new File("./resized" + imgNum + ".png");
-			for (int i = 0; i < cols - deltaHoriz; i++) {
-				for (int j = 0; j < rows - deltaVert; j++) {
-					imageResized.setRGB(i, j, resized[i][j].getRGB());
+					}
 				}
-			}
+				ImageIO.write(imageEnergy, "PNG", fileEnergy);
 
-			ImageIO.write(imageResized, "PNG", fileResized);
-			System.out.println("Process successfully completed.");
+				/* Save an image of the image with a seam */
+				BufferedImage imageSeam = new BufferedImage(cols, rows, BufferedImage.TYPE_INT_RGB);
+				File fileSeam = new File("./seam" + imgNum + ".png");
+				// Copies the energy representation of the photo into the buffered image
+				for (int i = 0; i < cols; i++) {
+					for (int j = 0; j < rows; j++) {
+						imageSeam.setRGB(i, j, imageEnergy.getRGB(i, j));
+					}
+				}
+				// Draws the vertical and horizontal seams
+				drawSeamHorizontal(findHorizontalSeams(energyArray), imageSeam);
+				drawSeamVertical(findVerticalSeams(energyArray), imageSeam);
+				ImageIO.write(imageSeam, "PNG", fileSeam);
+
+				// Save pixels in x and y to shrink
+				int deltaYt = deltaY;
+				int deltaXt = deltaX;
+
+				// Declare variables to prepare for the while loop
+				Color[][] resized = image.clone(); // instantiate this one as our original image
+				double[][] energyArr;
+				SeamFindingPair[][] pathArrayV;
+				SeamFindingPair[][] pathArrayH;
+				SeamFindingPair mPathV;
+				SeamFindingPair mPathH;
+
+				System.out.println("Carving: ");
+
+				// Keep going until we are done with the horizontal and vertical carving
+				while (deltaYt > 0 || deltaXt > 0) {
+
+					// Get energy array for resized array
+					energyArr = energyFunction(resized);
+
+					// Get array of seam paths for vertical and horizontal
+					pathArrayV = findVerticalSeams(energyArr);
+					pathArrayH = findHorizontalSeams(energyArr);
+
+					// Get min seam paths for vertical and horizontal
+					mPathV = findMinSeamVertical(pathArrayV);
+					mPathH = findMinSeamHorizontal(pathArrayH);
+
+					// If no more horizontal seams to be carved, carve vertical seams
+					if (deltaYt == 0) {
+						resized = carveSeamVertical(pathArrayV, resized);
+						deltaXt--;
+						System.out.print("V ");
+					}
+
+					// If no more vertical seams to be carved, carve horizontal seams
+					else if (deltaXt == 0) {
+						resized = carveSeamHorizontal(pathArrayH, resized);
+						deltaYt--;
+						System.out.print("H ");
+					}
+
+					// If vertical seam has less cumulative energy than the horizontal, carve
+					// vertical
+					else if (mPathV.getDouble() < mPathH.getDouble()) {
+						resized = carveSeamVertical(pathArrayV, resized);
+						deltaXt--;
+						System.out.print("V ");
+					}
+
+					// If horizontal seam has less cumulative energy than the vertical, carve
+					// horizontal
+					else {
+						resized = carveSeamHorizontal(pathArrayH, resized);
+						deltaYt--;
+						System.out.print("H ");
+					}
+
+				}
+
+				System.out.println();
+
+				// Copies the seam-carved photo into the buffered image
+				BufferedImage imageResized = new BufferedImage(cols - deltaX, rows - deltaY,
+						BufferedImage.TYPE_INT_RGB);
+				File fileResized = new File("./resized" + imgNum + ".png");
+				for (int i = 0; i < cols - deltaX; i++) {
+					for (int j = 0; j < rows - deltaY; j++) {
+						imageResized.setRGB(i, j, resized[i][j].getRGB());
+					}
+				}
+				ImageIO.write(imageResized, "PNG", fileResized);
+				System.out.println("Process successfully completed for" + file.getName());
+
+			} catch (IOException e) {
+				throw e;
+			}
 		}
 
 	}
