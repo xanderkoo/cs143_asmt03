@@ -7,7 +7,17 @@ import java.awt.Color;
 
 /**
  * Runs a seam-carving algorithm for resizing (shrinking) images in the main
- * method.
+ * method. Allows for batch resizing. Outputs energy map, energy map with
+ * vertical and horizontal seam, and resized image as .png files.
+ * 
+ * To run the method, place image files into the project folder named
+ * "image0.jpg", "image1.jpg", "image2.jpg", etc. for however many images you
+ * want to shrink. Make sure the images you want to resize are named in
+ * sequential order from 0. Then run SeamCarving.java as a Java application.
+ * 
+ * The main method takes three arguments: vertical shrinkage in pixels [0,
+ * height), horizontal shrinkage in pixels [0, width), and number of images to
+ * resize.
  * 
  * @author aden-siebel
  * @author akari-ishida
@@ -587,7 +597,7 @@ public class SeamCarving {
 	 * project folder and writes resized image, energy map, and the energy map with
 	 * demo seams as .PNG files into folder
 	 * 
-	 * @param args args[0]: horiz reduction in px, args[1]: vert reduction in px,
+	 * @param args args[0]: vert. reduction in px, args[1]: horiz. reduction in px,
 	 *             args[2]: number of images
 	 * @throws IOException              if file is not found
 	 * @throws IllegalArgumentException if deltaX >= width or deltaY >= length
@@ -674,7 +684,8 @@ public class SeamCarving {
 
 				System.out.println("Carving: ");
 
-				// Keep going until we are done with the horizontal and vertical carving
+				// Keep going until we are done with the horizontal and vertical carving.
+				// Recalculates the seam path array every time a seam is removed.
 				while (deltaYt > 0 || deltaXt > 0) {
 
 					// Get energy array for resized array
